@@ -38,8 +38,8 @@ export type Match =
 /**
  * Handle is a function which handles a request.
  */
-export interface Handle<T extends string> {
-  (r: HandlerRequest<T>): Promise<Response> | Response;
+export interface Handle<T extends string = string> {
+  (ctx: HandlerContext<T>): Promise<Response> | Response;
 }
 
 /**
@@ -58,14 +58,14 @@ export interface Handler<T extends string> {
 }
 
 /**
- * Handlers is a collection of handlers.
+ * Handlers is a group of handlers.
  */
 export type Handlers<T extends string = string> = Handler<T>[];
 
 /**
- * HandlerRequest is the input to a handler.
+ * HandlerContext is the object passed to a handler.
  */
-export interface HandlerRequest<T extends string> {
+export interface HandlerContext<T extends string> {
   /**
    * request is the original request object.
    */
@@ -100,7 +100,7 @@ export function createRouter(): Router {
  */
 type RouterInterface = Record<
   Lowercase<Method>,
-  ((p: URLPattern, r: Handle<string>) => Router)
+  ((pattern: string, handle: Handle) => Router)
 >;
 
 /**
@@ -108,7 +108,7 @@ type RouterInterface = Record<
  */
 export class Router implements RouterInterface {
   public handlers: Handlers = [];
-  public fallbackResponse: Response | undefined;
+  public fallbackHandler?: Handle;
 
   /**
    * fetch invokes the router for the given request.
@@ -145,7 +145,7 @@ export class Router implements RouterInterface {
       }
 
       // If the handler matches, call it and return the response.
-      if ((matchedFn || matchedMethod || matchedPattern)) {
+      if (matchedFn || matchedMethod || matchedPattern) {
         return await handler.handle({
           request,
           url,
@@ -157,8 +157,15 @@ export class Router implements RouterInterface {
       i++;
     }
 
-    if (this.fallbackResponse !== undefined) {
-      return this.fallbackResponse;
+    if (this.fallbackHandler !== undefined) {
+      return await this.fallbackHandler({
+        request,
+        url,
+        params: {},
+        next: () => {
+          throw new Error("next() called from fallback handler");
+        },
+      });
     }
 
     throw new Error("Not found");
@@ -183,15 +190,18 @@ export class Router implements RouterInterface {
       return this;
     }
 
-    this.handlers.push({
-      handle: handle!,
-      match: matchOrHandler as Match,
-    });
+    if (handle !== undefined) {
+      this.handlers.push({
+        handle,
+        match: matchOrHandler as Match,
+      });
+    }
+
     return this;
   }
 
   /**
-   * extend appends additional handlers to the router.
+   * use appends a group of handlers to the router.
    */
   public use(data: Handlers | Router): this {
     if (data instanceof Router) {
@@ -206,8 +216,8 @@ export class Router implements RouterInterface {
   /**
    * fallback sets the fallback response for the router.
    */
-  public fallback(response: Response | undefined): this {
-    this.fallbackResponse = response;
+  public fallback(handler: Handle | undefined): this {
+    this.fallbackHandler = handler;
     return this;
   }
 
@@ -215,89 +225,116 @@ export class Router implements RouterInterface {
    * connect appends a handler for the CONNECT method to the router.
    */
   public connect<T extends string>(
-    pattern: URLPattern,
+    pattern: string,
     handle: Handle<T>,
   ): this {
-    return this.with({ method: "CONNECT", pattern }, handle);
+    return this.with({
+      method: "CONNECT",
+      pattern: new URLPattern({ pathname: pattern }),
+    }, handle);
   }
 
   /**
    * delete appends a handler for the DELETE method to the router.
    */
   public delete<T extends string>(
-    pattern: URLPattern,
+    pattern: string,
     handle: Handle<T>,
   ): this {
-    return this.with({ method: "DELETE", pattern }, handle);
+    return this.with({
+      method: "DELETE",
+      pattern: new URLPattern({ pathname: pattern }),
+    }, handle);
   }
 
   /**
    * get appends a handler for the GET method to the router.
    */
   public get<T extends string>(
-    pattern: URLPattern,
+    pattern: string,
     handle: Handle<T>,
   ): this {
-    return this.with({ method: "GET", pattern }, handle);
+    return this.with({
+      method: "GET",
+      pattern: new URLPattern({ pathname: pattern }),
+    }, handle);
   }
 
   /**
    * head appends a handler for the HEAD method to the router.
    */
   public head<T extends string>(
-    pattern: URLPattern,
+    pattern: string,
     handle: Handle<T>,
   ): this {
-    return this.with({ method: "HEAD", pattern }, handle);
+    return this.with({
+      method: "HEAD",
+      pattern: new URLPattern({ pathname: pattern }),
+    }, handle);
   }
 
   /**
    * options appends a handler for the OPTIONS method to the router.
    */
   public options<T extends string>(
-    pattern: URLPattern,
+    pattern: string,
     handle: Handle<T>,
   ): this {
-    return this.with({ method: "OPTIONS", pattern }, handle);
+    return this.with({
+      method: "OPTIONS",
+      pattern: new URLPattern({ pathname: pattern }),
+    }, handle);
   }
 
   /**
    * patch appends a handler for the PATCH method to the router.
    */
   public patch<T extends string>(
-    pattern: URLPattern,
+    pattern: string,
     handle: Handle<T>,
   ): this {
-    return this.with({ method: "PATCH", pattern }, handle);
+    return this.with({
+      method: "PATCH",
+      pattern: new URLPattern({ pathname: pattern }),
+    }, handle);
   }
 
   /**
    * post appends a handler for the POST method to the router.
    */
   public post<T extends string>(
-    pattern: URLPattern,
+    pattern: string,
     handle: Handle<T>,
   ): this {
-    return this.with({ method: "POST", pattern }, handle);
+    return this.with({
+      method: "POST",
+      pattern: new URLPattern({ pathname: pattern }),
+    }, handle);
   }
 
   /**
    * put appends a handler for the PUT method to the router.
    */
   public put<T extends string>(
-    pattern: URLPattern,
+    pattern: string,
     handle: Handle<T>,
   ): this {
-    return this.with({ method: "PUT", pattern }, handle);
+    return this.with({
+      method: "PUT",
+      pattern: new URLPattern({ pathname: pattern }),
+    }, handle);
   }
 
   /**
    * trace appends a handler for the TRACE method to the router.
    */
   public trace<T extends string>(
-    pattern: URLPattern,
+    pattern: string,
     handle: Handle<T>,
   ): this {
-    return this.with({ method: "TRACE", pattern }, handle);
+    return this.with({
+      method: "TRACE",
+      pattern: new URLPattern({ pathname: pattern }),
+    }, handle);
   }
 }

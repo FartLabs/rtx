@@ -3,7 +3,7 @@
   "name": "@fartlabs/rtx",
   "version": "0.0.0",
   "imports": {
-    "rtx/": "./lib/"
+    "rtx/": "./"
   },
   "tasks": {
     "example": "deno run --allow-net examples/farm/farm.ts"
