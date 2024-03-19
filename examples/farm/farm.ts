@@ -9,5 +9,5 @@ if (import.meta.main) {
       },
     );
 
-  Deno.serve(router.fetch.bind(router));
+  Deno.serve((request) => router.fetch(request));
 }

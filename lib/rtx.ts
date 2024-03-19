@@ -80,6 +80,12 @@ export interface HandlerRequest<T extends string> {
    * params is a map of matched parameters from the URL pattern.
    */
   params: { [key in T]: string };
+
+  /**
+   * next executes the next handler in the chain. If no more handlers are
+   * available, the fallback response is returned.
+   */
+  next: () => Promise<Response>;
 }
 
 /**
@@ -107,51 +113,48 @@ export class Router implements RouterInterface {
   /**
    * fetch invokes the router for the given request.
    */
-  public async fetch(request: Request): Promise<Response> {
+  public async fetch(request: Request, i = 0): Promise<Response> {
     const url = new URL(request.url);
-    for (const handler of this.handlers) {
-      if (typeof handler.match === "function") {
-        if (await handler.match({ request, url })) {
-          return await handler.handle({
-            request,
-            url,
-            params: {},
-          });
-        }
-      } else if (handler.match !== undefined) {
-        if (
-          handler.match.method !== undefined &&
-          handler.match.method !== request.method
-        ) {
-          continue;
-        }
+    while (i < this.handlers.length) {
+      const handler = this.handlers[i];
+      const matchedFn = typeof handler.match === "function" &&
+        await handler.match({ request, url });
+      const matchedMethod = handler.match !== undefined &&
+        typeof handler.match !== "function" &&
+        (handler.match.method === undefined ||
+          handler.match.method === request.method);
+      const matchedPattern = handler.match !== undefined &&
+        typeof handler.match !== "function" &&
+        handler.match.pattern !== undefined &&
+        handler.match.pattern.exec(request.url);
+      let params: Record<string, string> = {};
+      if (matchedPattern) {
+        params = matchedPattern?.pathname
+          ? Object.entries(matchedPattern.pathname.groups)
+            .reduce(
+              (groups, [key, value]) => {
+                if (value !== undefined) {
+                  groups[key] = value;
+                }
 
-        let match: URLPatternResult | null = null;
-        if (handler.match.pattern !== undefined) {
-          match = handler.match.pattern?.exec(request.url);
-          if (match === null) {
-            continue;
-          }
-        }
+                return groups;
+              },
+              {} as { [key: string]: string },
+            )
+          : {};
+      }
 
+      // If the handler matches, call it and return the response.
+      if ((matchedFn || matchedMethod || matchedPattern)) {
         return await handler.handle({
           request,
           url,
-          params: match?.pathname
-            ? Object.entries(match.pathname.groups)
-              .reduce(
-                (groups, [key, value]) => {
-                  if (value !== undefined) {
-                    groups[key] = value;
-                  }
-
-                  return groups;
-                },
-                {} as { [key: string]: string },
-              )
-            : {},
+          params,
+          next: () => this.fetch(request, i),
         });
       }
+
+      i++;
     }
 
     if (this.fallbackResponse !== undefined) {
