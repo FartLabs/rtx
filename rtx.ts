@@ -1,10 +1,4 @@
 /**
- * @module
- *
- * rtx is a minimalistic HTTP router library based on the `URLPattern` API.
- */
-
-/**
  * createRouter creates a new router.
  */
 export function createRouter(fn?: (r: Router) => Router): Router {
@@ -115,7 +109,7 @@ type RouterInterface = Record<
 >;
 
 /**
- * Router is a collection of routes.
+ * Router is an HTTP router based on the `URLPattern` API.
  */
 export class Router implements RouterInterface {
   public routes: Routes = [];
