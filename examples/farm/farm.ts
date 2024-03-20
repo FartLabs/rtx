@@ -5,7 +5,7 @@ if (import.meta.main) {
     .get<"id">("/animals/:id", (ctx) => {
       return new Response(`Animal ID: ${ctx.params.id}`);
     })
-    .fallback(() => new Response("Not found", { status: 404 }));
+    .default(() => new Response("Not found", { status: 404 }));
 
   Deno.serve((request) => router.fetch(request));
 }

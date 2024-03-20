@@ -1,4 +1,22 @@
 /**
+ * @module
+ *
+ * rtx is a minimalistic HTTP router library based on the `URLPattern` API.
+ */
+
+/**
+ * createRouter creates a new router.
+ */
+export function createRouter(fn?: (r: Router) => Router): Router {
+  const router = new Router();
+  if (fn) {
+    return fn(router);
+  }
+
+  return router;
+}
+
+/**
  * METHODS is the list of HTTP methods.
  */
 export const METHODS = [
@@ -82,17 +100,10 @@ export interface RouterContext<T extends string> {
   params: { [key in T]: string };
 
   /**
-   * next executes the next router in the chain. If no more routers are
-   * available, the fallback response is returned.
+   * next executes the next matched route in the sequence. If no more routes are
+   * matched, the default handler is called.
    */
   next: () => Promise<Response>;
-}
-
-/**
- * createRouter creates a new router.
- */
-export function createRouter(): Router {
-  return new Router();
 }
 
 /**
@@ -108,7 +119,7 @@ type RouterInterface = Record<
  */
 export class Router implements RouterInterface {
   public routes: Routes = [];
-  public fallbackHandle?: Handle;
+  public defaultHandle?: Handle;
 
   /**
    * fetch invokes the router for the given request.
@@ -117,10 +128,10 @@ export class Router implements RouterInterface {
     const url = new URL(request.url);
     while (i < this.routes.length) {
       const route = this.routes[i];
-      const matchedMethod = route.match !== undefined &&
+      const matchedMethod = route.match === undefined ||
         typeof route.match !== "function" &&
-        (route.match.method === undefined ||
-          route.match.method === request.method);
+          (route.match.method === undefined ||
+            route.match.method === request.method);
       if (!matchedMethod) {
         i++;
         continue;
@@ -150,25 +161,25 @@ export class Router implements RouterInterface {
       }
 
       // If the route matches, call it and return the response.
-      if (matchedFn || matchedPattern) {
+      if (route.match === undefined || matchedFn || matchedPattern) {
         return await route.handle({
           request,
           url,
           params,
-          next: () => this.fetch(request, i),
+          next: () => this.fetch(request, i + 1),
         });
       }
 
       i++;
     }
 
-    if (this.fallbackHandle !== undefined) {
-      return await this.fallbackHandle({
+    if (this.defaultHandle !== undefined) {
+      return await this.defaultHandle({
         request,
         url,
         params: {},
         next: () => {
-          throw new Error("next() called from fallback route");
+          throw new Error("next() called from default handler");
         },
       });
     }
@@ -213,10 +224,10 @@ export class Router implements RouterInterface {
   }
 
   /**
-   * fallback sets the fallback response for the router.
+   * default sets the router's default handler.
    */
-  public fallback(handle: Handle | undefined): this {
-    this.fallbackHandle = handle;
+  public default(handle: Handle | undefined): this {
+    this.defaultHandle = handle;
     return this;
   }
 
