@@ -184,21 +184,21 @@ export class Router implements RouterInterface {
   /**
    * with appends a route to the router.
    */
-  public with<T extends string>(
-    handle: Handle<T>,
-  ): this;
+  public with<T extends string>(route: Route<T>): this;
   public with<T extends string>(
     match: Match,
     handle: Handle<T>,
   ): this;
   public with<T extends string>(
-    matchOrHandle: Match | Handle<T>,
+    routeOrMatch: Match | Route<T>,
     handle?: Handle<T>,
   ): this {
-    if (typeof matchOrHandle === "function" && handle === undefined) {
-      this.routes.push({ handle: matchOrHandle as Handle<T> });
-    } else if (handle !== undefined) {
-      this.routes.push({ handle, match: matchOrHandle as Match });
+    if (handle === undefined && "handle" in routeOrMatch) {
+      this.routes.push(routeOrMatch);
+    } else if (handle !== undefined && !("handle" in routeOrMatch)) {
+      this.routes.push({ match: routeOrMatch, handle });
+    } else {
+      throw new Error("Invalid arguments");
     }
 
     return this;
@@ -234,7 +234,7 @@ export class Router implements RouterInterface {
   ): this {
     return this.with({
       method: "CONNECT",
-      pattern: new URLPattern({ pathname: pattern }),
+      pattern: pattern ? new URLPattern({ pathname: pattern }) : undefined,
     }, handle);
   }
 

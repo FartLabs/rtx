@@ -2,9 +2,17 @@
   "lock": false,
   "name": "@fartlabs/rtx",
   "version": "0.0.1",
-  "exports": "./mod.ts",
+  "exports": {
+    ".": "./mod.ts",
+    "./components": "./components/mod.ts"
+  },
   "imports": {
+    "@fartlabs/jsonx": "jsr:@fartlabs/jsonx@^0.0.10",
     "rtx/": "./"
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "@fartlabs/jsonx"
   },
   "tasks": {
     "example": "deno run --allow-net examples/farm/farm.ts"
