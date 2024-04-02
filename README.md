@@ -4,19 +4,14 @@
 [![GitHub
 Actions][GitHub Actions badge]][GitHub Actions]
 
-Minimal HTTP router library based on the `URLPattern` API.
+Minimal HTTP router library based on the `URLPattern` API in JSX.
 
 ## Usage
 
-```ts
+```tsx
 import { createRouter } from "@fartlabs/rtx";
 
-const router = createRouter()
-  .get("/", () => {
-    return new Response("Hello, World!");
-  })
-  .default(() => new Response("Not found", { status: 404 }));
-
+const router = <Get pattern="/" handle={() => new Response("Hello, World!")} />;
 Deno.serve((request) => router.fetch(request));
 ```
 
