@@ -4,9 +4,11 @@
   "version": "0.0.1",
   "exports": "./mod.ts",
   "imports": {
-    "rtx/": "./"
+    "@fartlabs/jsonx": "jsr:@fartlabs/jsonx@^0.0.10",
+    "@fartlabs/rt": "jsr:@fartlabs/rt@^0.0.1"
   },
-  "tasks": {
-    "example": "deno run --allow-net examples/farm/farm.ts"
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "@fartlabs/jsonx"
   }
 }

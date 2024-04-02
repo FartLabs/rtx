@@ -1,344 +1,122 @@
+import type {
+  Handle as IHandle,
+  Method as IMethod,
+  Route as IRoute,
+} from "@fartlabs/rt";
+import { createRouter, Router as CRouter } from "@fartlabs/rt";
+
 /**
- * createRouter creates a new router.
+ * ComponentsInterface is the interface for the components.
  */
-export function createRouter(fn?: (r: Router) => Router): Router {
-  const router = new Router();
-  if (fn) {
-    return fn(router);
+export type ComponentsInterface = Record<
+  Capitalize<Lowercase<IMethod>>,
+  (props: RouteProps) => CRouter
+>;
+
+/**
+ * RouteProps are the props for a route component.
+ */
+export interface RouteProps {
+  pattern: string;
+  handle: IHandle;
+}
+
+/**
+ * RouterProps are the props for the router component.
+ */
+export interface RouterProps {
+  children?: unknown[];
+  default?: IHandle;
+}
+
+/**
+ * Router is the router component.
+ */
+export function Router(props: RouterProps): CRouter {
+  const router = createRouter();
+  ((props.children) as CRouter[])
+    ?.forEach((child) => {
+      if (child instanceof CRouter) {
+        router.use(child);
+        return;
+      }
+
+      throw new Error("Invalid child of Router");
+    });
+
+  if (props.default) {
+    router.default(props.default);
   }
 
   return router;
 }
 
 /**
- * METHODS is the list of HTTP methods.
+ * Route is the route component.
  */
-export const METHODS = [
-  "CONNECT",
-  "DELETE",
-  "GET",
-  "HEAD",
-  "OPTIONS",
-  "PATCH",
-  "POST",
-  "PUT",
-  "TRACE",
-] as const;
-
-/**
- * Method is a type which represents an HTTP method.
- */
-export type Method = typeof METHODS[number];
-
-/**
- * Match is a type which matches a Request object.
- */
-export type Match =
-  | ((detail: { request: Request; url: URL }) => Promise<boolean>)
-  | {
-    /**
-     * pattern is the URL pattern to match on.
-     */
-    pattern?: URLPattern;
-
-    /**
-     * method is the HTTP method to match on.
-     */
-    method?: Method;
-  };
-
-/**
- * Handle is called to handle a request.
- */
-export interface Handle<T extends string = string> {
-  (ctx: RouterContext<T>): Promise<Response> | Response;
+export function Route(props: IRoute): CRouter {
+  return createRouter().with(props);
 }
 
 /**
- * Route represents a the pairing of a matcher and a handler.
+ * Connect is the route component for a CONNECT route.
  */
-export interface Route<T extends string = string> {
-  /**
-   * handle is called to handle a request.
-   */
-  handle: Handle<T>;
-
-  /**
-   * match is called to match a request.
-   */
-  match?: Match;
+export function Connect(props: RouteProps): CRouter {
+  return createRouter().connect(props.pattern, props.handle);
 }
 
 /**
- * Routes is a sequence of routes.
+ * Delete is the route component for a DELETE route.
  */
-export type Routes<T extends string = string> = Route<T>[];
-
-/**
- * RouterContext is the object passed to a router.
- */
-export interface RouterContext<T extends string> {
-  /**
-   * request is the original request object.
-   */
-  request: Request;
-
-  /**
-   * url is the parsed fully qualified URL of the request.
-   */
-  url: URL;
-
-  /**
-   * params is a map of matched parameters from the URL pattern.
-   */
-  params: { [key in T]: string };
-
-  /**
-   * next executes the next matched route in the sequence. If no more routes are
-   * matched, the default handler is called.
-   */
-  next: () => Promise<Response>;
+export function Delete(props: RouteProps): CRouter {
+  return createRouter().delete(props.pattern, props.handle);
 }
 
 /**
- * RouterInterface is the interface for a router.
+ * Get is the route component for a GET route.
  */
-type RouterInterface = Record<
-  Lowercase<Method>,
-  ((pattern: string, handle: Handle) => Router)
->;
+export function Get(props: RouteProps): CRouter {
+  return createRouter().get(props.pattern, props.handle);
+}
 
 /**
- * Router is an HTTP router based on the `URLPattern` API.
+ * Head is the route component for a HEAD route.
  */
-export class Router implements RouterInterface {
-  public routes: Routes = [];
-  public defaultHandle?: Handle;
+export function Head(props: RouteProps): CRouter {
+  return createRouter().head(props.pattern, props.handle);
+}
 
-  /**
-   * fetch invokes the router for the given request.
-   */
-  public async fetch(request: Request, i = 0): Promise<Response> {
-    const url = new URL(request.url);
-    while (i < this.routes.length) {
-      const route = this.routes[i];
-      const matchedMethod = route.match === undefined ||
-        typeof route.match !== "function" &&
-          (route.match.method === undefined ||
-            route.match.method === request.method);
-      if (!matchedMethod) {
-        i++;
-        continue;
-      }
+/**
+ * Options is the route component for a OPTIONS route.
+ */
+export function Options(props: RouteProps): CRouter {
+  return createRouter().options(props.pattern, props.handle);
+}
 
-      const matchedFn = typeof route.match === "function" &&
-        await route.match({ request, url });
-      const matchedPattern = route.match !== undefined &&
-        typeof route.match !== "function" &&
-        route.match.pattern !== undefined &&
-        route.match.pattern.exec(request.url);
-      let params: Record<string, string> = {};
-      if (matchedPattern) {
-        params = matchedPattern?.pathname
-          ? Object.entries(matchedPattern.pathname.groups)
-            .reduce(
-              (groups, [key, value]) => {
-                if (value !== undefined) {
-                  groups[key] = value;
-                }
+/**
+ * Patch is the route component for a PATCH route.
+ */
+export function Patch(props: RouteProps): CRouter {
+  return createRouter().patch(props.pattern, props.handle);
+}
 
-                return groups;
-              },
-              {} as { [key: string]: string },
-            )
-          : {};
-      }
+/**
+ * Post is the route component for a POST route.
+ */
+export function Post(props: RouteProps): CRouter {
+  return createRouter().post(props.pattern, props.handle);
+}
 
-      // If the route matches, call it and return the response.
-      if (route.match === undefined || matchedFn || matchedPattern) {
-        return await route.handle({
-          request,
-          url,
-          params,
-          next: () => this.fetch(request, i + 1),
-        });
-      }
+/**
+ * Put is the route component for a PUT route.
+ */
+export function Put(props: RouteProps): CRouter {
+  return createRouter().put(props.pattern, props.handle);
+}
 
-      i++;
-    }
-
-    if (this.defaultHandle !== undefined) {
-      return await this.defaultHandle({
-        request,
-        url,
-        params: {},
-        next: () => {
-          throw new Error("next() called from default handler");
-        },
-      });
-    }
-
-    throw new Error("Not found");
-  }
-
-  /**
-   * with appends a route to the router.
-   */
-  public with<T extends string>(
-    handle: Handle<T>,
-  ): this;
-  public with<T extends string>(
-    match: Match,
-    handle: Handle<T>,
-  ): this;
-  public with<T extends string>(
-    matchOrHandle: Match | Handle<T>,
-    handle?: Handle<T>,
-  ): this {
-    if (typeof matchOrHandle === "function" && handle === undefined) {
-      this.routes.push({ handle: matchOrHandle as Handle<T> });
-    } else if (handle !== undefined) {
-      this.routes.push({ handle, match: matchOrHandle as Match });
-    }
-
-    return this;
-  }
-
-  /**
-   * use appends a sequence of routers to the router.
-   */
-  public use(data: Routes | Router): this {
-    if (data instanceof Router) {
-      this.routes.push(...data.routes);
-    } else {
-      this.routes.push(...data);
-    }
-
-    return this;
-  }
-
-  /**
-   * default sets the router's default handler.
-   */
-  public default(handle: Handle | undefined): this {
-    this.defaultHandle = handle;
-    return this;
-  }
-
-  /**
-   * connect appends a router for the CONNECT method to the router.
-   */
-  public connect<T extends string>(
-    pattern: string,
-    handle: Handle<T>,
-  ): this {
-    return this.with({
-      method: "CONNECT",
-      pattern: new URLPattern({ pathname: pattern }),
-    }, handle);
-  }
-
-  /**
-   * delete appends a router for the DELETE method to the router.
-   */
-  public delete<T extends string>(
-    pattern: string,
-    handle: Handle<T>,
-  ): this {
-    return this.with({
-      method: "DELETE",
-      pattern: new URLPattern({ pathname: pattern }),
-    }, handle);
-  }
-
-  /**
-   * get appends a router for the GET method to the router.
-   */
-  public get<T extends string>(
-    pattern: string,
-    handle: Handle<T>,
-  ): this {
-    return this.with({
-      method: "GET",
-      pattern: new URLPattern({ pathname: pattern }),
-    }, handle);
-  }
-
-  /**
-   * head appends a router for the HEAD method to the router.
-   */
-  public head<T extends string>(
-    pattern: string,
-    handle: Handle<T>,
-  ): this {
-    return this.with({
-      method: "HEAD",
-      pattern: new URLPattern({ pathname: pattern }),
-    }, handle);
-  }
-
-  /**
-   * options appends a router for the OPTIONS method to the router.
-   */
-  public options<T extends string>(
-    pattern: string,
-    handle: Handle<T>,
-  ): this {
-    return this.with({
-      method: "OPTIONS",
-      pattern: new URLPattern({ pathname: pattern }),
-    }, handle);
-  }
-
-  /**
-   * patch appends a router for the PATCH method to the router.
-   */
-  public patch<T extends string>(
-    pattern: string,
-    handle: Handle<T>,
-  ): this {
-    return this.with({
-      method: "PATCH",
-      pattern: new URLPattern({ pathname: pattern }),
-    }, handle);
-  }
-
-  /**
-   * post appends a router for the POST method to the router.
-   */
-  public post<T extends string>(
-    pattern: string,
-    handle: Handle<T>,
-  ): this {
-    return this.with({
-      method: "POST",
-      pattern: new URLPattern({ pathname: pattern }),
-    }, handle);
-  }
-
-  /**
-   * put appends a router for the PUT method to the router.
-   */
-  public put<T extends string>(
-    pattern: string,
-    handle: Handle<T>,
-  ): this {
-    return this.with({
-      method: "PUT",
-      pattern: new URLPattern({ pathname: pattern }),
-    }, handle);
-  }
-
-  /**
-   * trace appends a router for the TRACE method to the router.
-   */
-  public trace<T extends string>(
-    pattern: string,
-    handle: Handle<T>,
-  ): this {
-    return this.with({
-      method: "TRACE",
-      pattern: new URLPattern({ pathname: pattern }),
-    }, handle);
-  }
+/**
+ * Trace is the route component for a TRACE route.
+ */
+export function Trace(props: RouteProps): CRouter {
+  return createRouter().trace(props.pattern, props.handle);
 }

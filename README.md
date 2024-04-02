@@ -4,18 +4,19 @@
 [![GitHub
 Actions][GitHub Actions badge]][GitHub Actions]
 
-Minimal HTTP router library based on the `URLPattern` API.
+> [!NOTE]
+>
+> Built with [**@fartlabs/rt**](https://github.com/FartLabs/rt) and
+> [**@fartlabs/jsonx**](https://github.com/FartLabs/jsonx).
+
+Minimal HTTP router library based on the `URLPattern` API in JSX.
 
 ## Usage
 
-```ts
-import { createRouter } from "@fartlabs/rtx";
+```tsx
+import { Get } from "@fartlabs/rtx";
 
-const router = createRouter()
-  .get("/", () => {
-    return new Response("Hello, World!");
-  })
-  .default(() => new Response("Not found", { status: 404 }));
+const router = <Get pattern="/" handle={() => new Response("Hello, World!")} />;
 
 Deno.serve((request) => router.fetch(request));
 ```
@@ -46,11 +47,11 @@ Run `deno lint` to lint the code.
 
 ---
 
-Developed with ❤️ by [**@EthanThatOneKid**](https://etok.codes/)
+Developed with ❤️ [**@FartLabs**](https://github.com/FartLabs)
 
 [JSR]: https://jsr.io/@fartlabs/rtx
 [JSR badge]: https://jsr.io/badges/@fartlabs/rtx
 [JSR score]: https://jsr.io/@fartlabs/rtx/score
 [JSR score badge]: https://jsr.io/badges/@fartlabs/rtx/score
-[GitHub Actions]: https://github.com/EthanThatOneKid/rtx/actions/workflows/check.yaml
-[GitHub Actions badge]: https://github.com/EthanThatOneKid/rtx/actions/workflows/check.yaml/badge.svg
+[GitHub Actions]: https://github.com/FartLabs/rtx/actions/workflows/check.yaml
+[GitHub Actions badge]: https://github.com/FartLabs/rtx/actions/workflows/check.yaml/badge.svg
