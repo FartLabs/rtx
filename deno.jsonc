@@ -2,20 +2,13 @@
   "lock": false,
   "name": "@fartlabs/rtx",
   "version": "0.0.1",
-  "exports": {
-    ".": "./mod.ts",
-    "./components": "./components/mod.ts"
-  },
+  "exports": "./mod.ts",
   "imports": {
     "@fartlabs/jsonx": "jsr:@fartlabs/jsonx@^0.0.10",
-    "@fartlabs/rt": "jsr:@fartlabs/rt@^0.0.1",
-    "rtx/": "./"
+    "@fartlabs/rt": "jsr:@fartlabs/rt@^0.0.1"
   },
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "@fartlabs/jsonx"
-  },
-  "tasks": {
-    "example": "deno run --allow-net examples/farm/farm.ts"
   }
 }
