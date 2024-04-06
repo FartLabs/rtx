@@ -1,4 +1,4 @@
-# rtx
+# [@fartlabs/rtx](https://jsr.io/@fartlabs/rtx)
 
 [![JSR][JSR badge]][JSR] [![JSR score][JSR score badge]][JSR score]
 [![GitHub Actions][GitHub Actions badge]][GitHub Actions]
