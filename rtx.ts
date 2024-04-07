@@ -1,4 +1,5 @@
 import type {
+  ErrorHandle as IErrorHandle,
   Handle as IHandle,
   Method as IMethod,
   Route as IRoute,
@@ -27,6 +28,7 @@ export interface RouteProps {
 export interface RouterProps {
   children?: unknown[];
   default?: IHandle;
+  error?: IErrorHandle;
 }
 
 /**
@@ -46,6 +48,10 @@ export function Router(props: RouterProps): CRouter {
 
   if (props.default) {
     router.default(props.default);
+  }
+
+  if (props.error) {
+    router.error(props.error);
   }
 
   return router;

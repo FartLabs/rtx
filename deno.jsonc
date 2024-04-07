@@ -5,7 +5,7 @@
   "exports": "./mod.ts",
   "imports": {
     "@fartlabs/jsonx": "jsr:@fartlabs/jsonx@^0.0.10",
-    "@fartlabs/rt": "jsr:@fartlabs/rt@^0.0.1"
+    "@fartlabs/rt": "jsr:@fartlabs/rt@^0.0.2"
   },
   "compilerOptions": {
     "jsx": "react-jsx",
