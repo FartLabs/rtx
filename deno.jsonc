@@ -1,7 +1,7 @@
 {
   "lock": false,
   "name": "@fartlabs/rtx",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "exports": "./mod.ts",
   "imports": {
     "@fartlabs/jsonx": "jsr:@fartlabs/jsonx@^0.0.10",
