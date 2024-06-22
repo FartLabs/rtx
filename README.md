@@ -24,10 +24,10 @@ Let's learn how to get started with rtx by creating a simple router in Deno.
 deno init
 ```
 
-3\. Add `@fartlabs/jsonx` and `@fartlabs/rtx` as project dependencies.
+3\. Add `@fartlabs/rtx` as a project dependency.
 
 ```sh
-deno add @fartlabs/jsonx @fartlabs/rtx
+deno add @fartlabs/rtx
 ```
 
 4\. Add the following values to your `deno.json(c)` file.
@@ -36,7 +36,7 @@ deno add @fartlabs/jsonx @fartlabs/rtx
 {
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "@fartlabs/jsonx"
+    "jsxImportSource": "@fartlabs/rtx"
   }
 }
 ```
