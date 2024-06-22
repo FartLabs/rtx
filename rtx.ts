@@ -11,7 +11,7 @@ import { createRouter, Router as CRouter } from "@fartlabs/rt";
  */
 export type ComponentsInterface = Record<
   Capitalize<Lowercase<IMethod>>,
-  (props: RouteProps) => CRouter
+  (props: RouteProps) => CRouter<unknown>
 >;
 
 /**
@@ -34,9 +34,9 @@ export interface RouterProps {
 /**
  * Router is the router component.
  */
-export function Router(props: RouterProps): CRouter {
+export function Router(props: RouterProps): CRouter<unknown> {
   const router = createRouter();
-  ((props.children) as CRouter[])
+  ((props.children) as CRouter<unknown>[])
     ?.forEach((child) => {
       if (child instanceof CRouter) {
         router.use(child);
@@ -60,69 +60,69 @@ export function Router(props: RouterProps): CRouter {
 /**
  * Route is the route component.
  */
-export function Route(props: IRoute): CRouter {
+export function Route(props: IRoute): CRouter<unknown> {
   return createRouter().with(props);
 }
 
 /**
  * Connect is the route component for a CONNECT route.
  */
-export function Connect(props: RouteProps): CRouter {
+export function Connect(props: RouteProps): CRouter<unknown> {
   return createRouter().connect(props.pattern, props.handle);
 }
 
 /**
  * Delete is the route component for a DELETE route.
  */
-export function Delete(props: RouteProps): CRouter {
+export function Delete(props: RouteProps): CRouter<unknown> {
   return createRouter().delete(props.pattern, props.handle);
 }
 
 /**
  * Get is the route component for a GET route.
  */
-export function Get(props: RouteProps): CRouter {
+export function Get(props: RouteProps): CRouter<unknown> {
   return createRouter().get(props.pattern, props.handle);
 }
 
 /**
  * Head is the route component for a HEAD route.
  */
-export function Head(props: RouteProps): CRouter {
+export function Head(props: RouteProps): CRouter<unknown> {
   return createRouter().head(props.pattern, props.handle);
 }
 
 /**
  * Options is the route component for a OPTIONS route.
  */
-export function Options(props: RouteProps): CRouter {
+export function Options(props: RouteProps): CRouter<unknown> {
   return createRouter().options(props.pattern, props.handle);
 }
 
 /**
  * Patch is the route component for a PATCH route.
  */
-export function Patch(props: RouteProps): CRouter {
+export function Patch(props: RouteProps): CRouter<unknown> {
   return createRouter().patch(props.pattern, props.handle);
 }
 
 /**
  * Post is the route component for a POST route.
  */
-export function Post(props: RouteProps): CRouter {
+export function Post(props: RouteProps): CRouter<unknown> {
   return createRouter().post(props.pattern, props.handle);
 }
 
 /**
  * Put is the route component for a PUT route.
  */
-export function Put(props: RouteProps): CRouter {
+export function Put(props: RouteProps): CRouter<unknown> {
   return createRouter().put(props.pattern, props.handle);
 }
 
 /**
  * Trace is the route component for a TRACE route.
  */
-export function Trace(props: RouteProps): CRouter {
+export function Trace(props: RouteProps): CRouter<unknown> {
   return createRouter().trace(props.pattern, props.handle);
 }
