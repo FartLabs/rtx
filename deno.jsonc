@@ -1,14 +1,14 @@
 {
   "lock": false,
   "name": "@fartlabs/rtx",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "exports": {
     ".": "./mod.ts",
     "./jsx-runtime": "./jsx-runtime.ts"
   },
   "imports": {
     "@fartlabs/jsonx": "jsr:@fartlabs/jsonx@^0.0.11",
-    "@fartlabs/rt": "jsr:@fartlabs/rt@^0.0.5"
+    "@fartlabs/rt": "jsr:@fartlabs/rt@^0.0.6"
   },
   "compilerOptions": {
     "jsx": "react-jsx",
