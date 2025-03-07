@@ -5,8 +5,4 @@
  * JSX.
  */
 
-import * as rtx from "./rtx.ts";
-
-rtx satisfies rtx.ComponentsInterface;
-
 export * from "./rtx.ts";

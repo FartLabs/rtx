@@ -8,7 +8,7 @@
   },
   "imports": {
     "@fartlabs/jsonx": "jsr:@fartlabs/jsonx@^0.0.11",
-    "@fartlabs/rt": "jsr:@fartlabs/rt@^0.0.4"
+    "@fartlabs/rt": "jsr:@fartlabs/rt@^0.0.5"
   },
   "compilerOptions": {
     "jsx": "react-jsx",
