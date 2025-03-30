@@ -10,7 +10,7 @@ type HandleRequestUnknown = HandleRequest<unknown>;
 type RtRouteUnknown = RtRoute<unknown>;
 type RouterUnknown = Router<unknown>;
 
-export type { RouteComponent as Route, RouterComponent as Router };
+export { RouteComponent as Route, RouterComponent as Router };
 
 /**
  * RouterProps are the props for the router component.
