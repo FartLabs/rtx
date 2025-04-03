@@ -1,11 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import type { Method } from "@std/http/unstable-method";
-import type {
-  DefaultHandler,
-  ErrorHandler,
-  RequestHandler,
-  RtRoute,
-} from "@fartlabs/rt";
+import type { DefaultHandler, ErrorHandler, RtRoute } from "@fartlabs/rt";
 import { Router } from "@fartlabs/rt";
 
 export { RouteComponent as Route, RouterComponent as Router };
@@ -49,21 +43,13 @@ function RouterComponent(props: RouterProps): Router<any> {
 /**
  * RouteProps are the props for a route component.
  */
-export interface RouteProps {
-  pattern: string;
-  handler: RequestHandler<any>;
-  method?: Method;
-}
+export interface RouteProps extends RtRoute<any> {}
 
 /**
  * RouteComponent is the route component.
  */
 export function RouteComponent(props: RouteProps): Router {
-  return new Router().with({
-    pattern: new URLPattern({ pathname: props.pattern }),
-    handler: props.handler,
-    method: props.method,
-  });
+  return new Router().with(props);
 }
 
 /**

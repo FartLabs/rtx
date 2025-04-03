@@ -1,14 +1,14 @@
 {
   "lock": false,
   "name": "@fartlabs/rtx",
-  "version": "0.0.12",
+  "version": "0.0.14",
   "exports": {
     ".": "./mod.ts",
     "./jsx-runtime": "./jsx-runtime.ts"
   },
   "imports": {
     "@fartlabs/jsonx": "jsr:@fartlabs/jsonx@^0.0.11",
-    "@fartlabs/rt": "jsr:@fartlabs/rt@^0.0.8",
+    "@fartlabs/rt": "jsr:@fartlabs/rt@^0.0.10",
     "@std/assert": "jsr:@std/assert@^1.0.12",
     "@std/http": "jsr:@std/http@^1.0.13"
   },
