@@ -1,4 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
+import type { Route } from "@std/http/unstable-route";
 import type { DefaultHandler, ErrorHandler, RtRoute } from "@fartlabs/rt";
 import { Router } from "@fartlabs/rt";
 
@@ -38,6 +39,15 @@ function RouterComponent(props: RouterProps): Router<any> {
   }
 
   return router;
+}
+
+export function StandardRoute(props: Route): Router {
+  return new Router().with({
+    ...props,
+    handler: ({ request, params, info }) => {
+      return props.handler(request, params, info);
+    },
+  });
 }
 
 /**
