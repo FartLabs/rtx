@@ -1,5 +1,4 @@
 // deno-lint-ignore-file no-explicit-any
-import type { Route } from "@std/http/unstable-route";
 import type { Method } from "@std/http/unstable-method";
 import type {
   DefaultHandler,
@@ -15,7 +14,7 @@ export { RouteComponent as Route, RouterComponent as Router };
  * RouterProps are the props for the router component.
  */
 export interface RouterProps {
-  children?: any[];
+  children?: Array<Router<any> | Router<any>[]>;
   default?: DefaultHandler;
   error?: ErrorHandler;
 }
@@ -25,7 +24,9 @@ export interface RouterProps {
  */
 function RouterComponent(props: RouterProps): Router<any> {
   const router = new Router<any>();
-  for (const child of ((props.children ?? []) as Router<any>[])) {
+  for (
+    const child of ((props.children) ?? []).flat()
+  ) {
     if (child instanceof Router) {
       router.use(child);
       continue;
