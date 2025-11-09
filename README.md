@@ -6,6 +6,10 @@
 Library of [`@fartlabs/jsonx`](https://github.com/FartLabs/jsonx) components for
 composing [`@fartlabs/rt`](https://github.com/FartLabs/rt) routers in JSX.
 
+## Tutorial
+
+[![Watch the video](https://img.youtube.com/vi/tQq3OK1ND1g/0.jpg)](https://www.youtube.com/watch?v=tQq3OK1ND1g)
+
 ## API documentation
 
 Generated API documentation is available at <https://jsr.io/@fartlabs/rtx>.
