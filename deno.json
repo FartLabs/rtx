@@ -17,6 +17,6 @@
     "jsxImportSource": "@fartlabs/jsonx"
   },
   "tasks": {
-    "outdated": "deno outdated --update --latest"
+    "outdated": "deno update --latest"
   }
 }

@@ -1,7 +1,7 @@
 # [@fartlabs/rtx](https://jsr.io/@fartlabs/rtx)
 
-[![JSR][JSR badge]][JSR] [![JSR score][JSR score badge]][JSR score]
 [![GitHub Actions][GitHub Actions badge]][GitHub Actions]
+[![JSR][JSR badge]][JSR] [![JSR score][JSR score badge]][JSR score]
 
 Library of [`@fartlabs/jsonx`](https://github.com/FartLabs/jsonx) components for
 composing [`@fartlabs/rt`](https://github.com/FartLabs/rt) routers in JSX.
@@ -50,7 +50,7 @@ const router = (
   <Router default={() => new Response("Not found", { status: 404 })}>
     <Get
       pattern="/"
-      handle={() =>
+      handler={() =>
         new Response("Hello, World!")}
     />
   </Router>
@@ -76,27 +76,29 @@ const router = (
   <Router default={() => new Response("Not found", { status: 404 })}>
     <Get
       pattern="/"
-      handle={() =>
+      handler={() =>
         new Response("Home")}
     />
     <Post
       pattern="/items"
-      handle={async (req) => {
-        const body = await req.json();
+      handler={async (ctx) => {
+        const body = await ctx.request.json();
         return Response.json({ created: body }, { status: 201 });
       }}
     />
     <Put
       pattern="/items/:id"
-      handle={async (req, { params }) => {
-        const body = await req.json();
-        return Response.json({ updatedId: params.id, data: body });
+      handler={async (ctx) => {
+        const body = await ctx.request.json();
+        const id = ctx.params?.pathname.groups.id;
+        return Response.json({ updatedId: id, data: body });
       }}
     />
     <Delete
       pattern="/items/:id"
-      handle={(_, { params }) =>
-        new Response(`Deleted ${params.id}`, { status: 204 })}
+      handler={(ctx) => {
+        return new Response(null, { status: 204 });
+      }}
     />
   </Router>
 );
@@ -111,16 +113,18 @@ const router = (
   <Router default={() => new Response("Not found", { status: 404 })}>
     <Get
       pattern="/users/:id"
-      handle={(request, { params, url }) => {
+      handler={(ctx) => {
+        const id = ctx.params?.pathname.groups.id;
+        const url = new URL(ctx.request.url);
         const page = Number(url.searchParams.get("page") ?? 1);
-        return Response.json({ id: params.id, page });
+        return Response.json({ id, page });
       }}
     />
   </Router>
 );
 ```
 
-### Middleware-like composition
+### Middleware composition
 
 You can wrap handlers to implement common behavior (auth, logging, headers).
 
@@ -128,24 +132,28 @@ You can wrap handlers to implement common behavior (auth, logging, headers).
 import { Get, Router } from "@fartlabs/rtx";
 import type { RequestHandler } from "@fartlabs/rt";
 
-const withJson = (handler: RequestHandler): RequestHandler => async (ctx) => {
-  try {
-    const res = await handler(ctx);
-    const headers = new Headers(res.headers);
-    if (!headers.has("content-type")) {
-      headers.set("content-type", "application/json; charset=utf-8");
+const withJson =
+  (handler: RequestHandler<unknown>): RequestHandler<unknown> =>
+  async (
+    ctx,
+  ) => {
+    try {
+      const res = await handler(ctx);
+      const headers = new Headers(res.headers);
+      if (!headers.has("content-type")) {
+        headers.set("content-type", "application/json; charset=utf-8");
+      }
+      return new Response(res.body, { status: res.status, headers });
+    } catch (error) {
+      return Response.json({ error: String(error) }, { status: 500 });
     }
-    return new Response(res.body, { status: res.status, headers });
-  } catch (error) {
-    return Response.json({ error: String(error) }, { status: 500 });
-  }
-};
+  };
 
 const router = (
   <Router default={() => new Response("Not found", { status: 404 })}>
     <Get
       pattern="/health"
-      handle={withJson(() =>
+      handler={withJson(() =>
         Response.json({ ok: true })
       )}
     />
@@ -155,22 +163,22 @@ const router = (
 
 ### Nested routes
 
+You can define multiple routes in the same Router component:
+
 ```tsx
 import { Get, Router } from "@fartlabs/rtx";
 
-const Users = (
-  <>
-    <Get pattern="/users" handle={() => Response.json([{ id: "1" }])} />
-    <Get
-      pattern="/users/:id"
-      handle={(_, { params }) => Response.json({ id: params.id })}
-    />
-  </>
-);
-
 const router = (
   <Router default={() => new Response("Not found", { status: 404 })}>
-    {Users}
+    <Get
+      pattern="/users"
+      handler={() =>
+        Response.json([{ id: "1" }])}
+    />
+    <Get
+      pattern="/users/:id"
+      handler={(ctx) => Response.json({ id: ctx.params?.pathname.groups.id })}
+    />
   </Router>
 );
 ```
@@ -184,7 +192,7 @@ const router = (
   <Router default={() => new Response("Not found", { status: 404 })}>
     <Get
       pattern="/boom"
-      handle={() => {
+      handler={() => {
         throw new Error("Something went wrong");
       }}
     />
@@ -211,10 +219,6 @@ Run `deno fmt` to format the code.
 
 Run `deno lint` to lint the code.
 
----
-
-Developed with ❤️ [**@FartLabs**](https://github.com/FartLabs)
-
 ## Related projects
 
 - [`@fartlabs/rt`](https://github.com/FartLabs/rt): Minimal runtime router
@@ -235,14 +239,19 @@ deno test -A
 - Replace imperative route registrations with JSX elements like `Get`, `Post`,
   etc.
 - Create a top-level `Router` and pass a `default` handler for unmatched routes.
-- Handlers receive `Request` and a context with `url` and `params` (for `:param`
-  tokens).
+- Handlers receive a single context object with `request`, `params` (URLPattern
+  match results), and other properties. Route parameters are accessed via
+  `ctx.params.pathname.groups.paramName`.
 - Compose cross-cutting concerns by higher-order functions that wrap route
-  `handle`.
+  `handler`.
 
 ## License
 
-This project is licensed under the MIT License — see `LICENSE` for details.
+See [LICENSE](LICENSE) for details.
+
+---
+
+Developed with ❤️ [**@FartLabs**](https://github.com/FartLabs)
 
 [JSR]: https://jsr.io/@fartlabs/rtx
 [JSR badge]: https://jsr.io/badges/@fartlabs/rtx
